@@ -1,0 +1,4 @@
+trailer
+=======
+
+GPX trail representation
