@@ -6,7 +6,7 @@
 
 import sys
 
-import ??? as supermod
+import gpx as supermod
 
 etree_ = None
 Verbose_import_ = False
@@ -197,7 +197,7 @@ def parse(inFilename):
 
 
 def parseString(inString):
-    from StringIO import StringIO
+    from io import StringIO
     doc = parsexml_(StringIO(inString))
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)

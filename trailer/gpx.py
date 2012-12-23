@@ -6,7 +6,7 @@
 #
 
 import sys
-import getopt
+import codecs
 import re as re_
 
 etree_ = None
@@ -45,6 +45,7 @@ except ImportError:
             except ImportError:
                 try:
                     # normal ElementTree install
+                    #noinspection PyUnresolvedReferences
                     import elementtree.ElementTree as etree_
                     XMLParser_import_library = XMLParser_import_elementtree
                     if Verbose_import_:
@@ -70,7 +71,7 @@ def parsexml_(*args, **kwargs):
 
 try:
     from generatedssuper import GeneratedsSuper
-except ImportError, exp:
+except ImportError as exp:
 
     class GeneratedsSuper(object):
         def gds_format_string(self, input_data, input_name=''):
@@ -88,7 +89,7 @@ except ImportError, exp:
             for value in values:
                 try:
                     fvalue = float(value)
-                except (TypeError, ValueError), exp:
+                except (TypeError, ValueError) as exp:
                     raise_parse_error(node, 'Requires sequence of integers')
             return input_data
         def gds_format_float(self, input_data, input_name=''):
@@ -102,7 +103,7 @@ except ImportError, exp:
             for value in values:
                 try:
                     fvalue = float(value)
-                except (TypeError, ValueError), exp:
+                except (TypeError, ValueError) as exp:
                     raise_parse_error(node, 'Requires sequence of floats')
             return input_data
         def gds_format_double(self, input_data, input_name=''):
@@ -116,7 +117,7 @@ except ImportError, exp:
             for value in values:
                 try:
                     fvalue = float(value)
-                except (TypeError, ValueError), exp:
+                except (TypeError, ValueError) as exp:
                     raise_parse_error(node, 'Requires sequence of doubles')
             return input_data
         def gds_format_boolean(self, input_data, input_name=''):
@@ -199,7 +200,7 @@ def showIndent(outfile, level, pretty_print=True):
 def quote_xml(inStr):
     if not inStr:
         return ''
-    s1 = (isinstance(inStr, basestring) and inStr or
+    s1 = (isinstance(inStr, str) and inStr or
           '%s' % inStr)
     s1 = s1.replace('&', '&amp;')
     s1 = s1.replace('<', '&lt;')
@@ -207,7 +208,7 @@ def quote_xml(inStr):
     return s1
 
 def quote_attrib(inStr):
-    s1 = (isinstance(inStr, basestring) and inStr or
+    s1 = (isinstance(inStr, str) and inStr or
           '%s' % inStr)
     s1 = s1.replace('&', '&amp;')
     s1 = s1.replace('<', '&lt;')
@@ -438,10 +439,10 @@ class gpxType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='gpxType'):
         if self.version is not None and 'version' not in already_processed:
             already_processed.append('version')
-            outfile.write(' version=%s' % (self.gds_format_string(quote_attrib(self.version).encode(ExternalEncoding), input_name='version'), ))
+            outfile.write(' version=%s' % (self.gds_format_string(quote_attrib(self.version), input_name='version'), ))
         if self.creator is not None and 'creator' not in already_processed:
             already_processed.append('creator')
-            outfile.write(' creator=%s' % (self.gds_format_string(quote_attrib(self.creator).encode(ExternalEncoding), input_name='creator'), ))
+            outfile.write(' creator=%s' % (self.gds_format_string(quote_attrib(self.creator), input_name='creator'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='gpxType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -640,10 +641,10 @@ class metadataType(GeneratedsSuper):
             eol_ = ''
         if self.name is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_, eol_))
+            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name), input_name='name'), namespace_, eol_))
         if self.desc is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc).encode(ExternalEncoding), input_name='desc'), namespace_, eol_))
+            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc), input_name='desc'), namespace_, eol_))
         if self.author is not None:
             self.author.export(outfile, level, namespace_, name_='author', pretty_print=pretty_print)
         if self.copyright is not None:
@@ -652,10 +653,10 @@ class metadataType(GeneratedsSuper):
             link_.export(outfile, level, namespace_, name_='link', pretty_print=pretty_print)
         if self.time is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stime>%s</%stime>%s' % (namespace_, self.gds_format_string(quote_xml(self.time).encode(ExternalEncoding), input_name='time'), namespace_, eol_))
+            outfile.write('<%stime>%s</%stime>%s' % (namespace_, self.gds_format_string(quote_xml(self.time), input_name='time'), namespace_, eol_))
         if self.keywords is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%skeywords>%s</%skeywords>%s' % (namespace_, self.gds_format_string(quote_xml(self.keywords).encode(ExternalEncoding), input_name='keywords'), namespace_, eol_))
+            outfile.write('<%skeywords>%s</%skeywords>%s' % (namespace_, self.gds_format_string(quote_xml(self.keywords), input_name='keywords'), namespace_, eol_))
         if self.bounds is not None:
             self.bounds.export(outfile, level, namespace_, name_='bounds', pretty_print=pretty_print)
         if self.extensions is not None:
@@ -685,10 +686,10 @@ class metadataType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+            outfile.write('name=%s,\n' % quote_python(self.name))
         if self.desc is not None:
             showIndent(outfile, level)
-            outfile.write('desc=%s,\n' % quote_python(self.desc).encode(ExternalEncoding))
+            outfile.write('desc=%s,\n' % quote_python(self.desc))
         if self.author is not None:
             showIndent(outfile, level)
             outfile.write('author=model_.personType(\n')
@@ -715,10 +716,10 @@ class metadataType(GeneratedsSuper):
         outfile.write('],\n')
         if self.time is not None:
             showIndent(outfile, level)
-            outfile.write('time=%s,\n' % quote_python(self.time).encode(ExternalEncoding))
+            outfile.write('time=%s,\n' % quote_python(self.time))
         if self.keywords is not None:
             showIndent(outfile, level)
-            outfile.write('keywords=%s,\n' % quote_python(self.keywords).encode(ExternalEncoding))
+            outfile.write('keywords=%s,\n' % quote_python(self.keywords))
         if self.bounds is not None:
             showIndent(outfile, level)
             outfile.write('bounds=model_.boundsType(\n')
@@ -907,7 +908,7 @@ class wptType(GeneratedsSuper):
             outfile.write('<%sele>%s</%sele>%s' % (namespace_, self.gds_format_float(self.ele, input_name='ele'), namespace_, eol_))
         if self.time is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stime>%s</%stime>%s' % (namespace_, self.gds_format_string(quote_xml(self.time).encode(ExternalEncoding), input_name='time'), namespace_, eol_))
+            outfile.write('<%stime>%s</%stime>%s' % (namespace_, self.gds_format_string(quote_xml(self.time), input_name='time'), namespace_, eol_))
         if self.magvar is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%smagvar>%s</%smagvar>%s' % (namespace_, self.gds_format_float(self.magvar, input_name='magvar'), namespace_, eol_))
@@ -916,27 +917,27 @@ class wptType(GeneratedsSuper):
             outfile.write('<%sgeoidheight>%s</%sgeoidheight>%s' % (namespace_, self.gds_format_float(self.geoidheight, input_name='geoidheight'), namespace_, eol_))
         if self.name is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_, eol_))
+            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name), input_name='name'), namespace_, eol_))
         if self.cmt is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%scmt>%s</%scmt>%s' % (namespace_, self.gds_format_string(quote_xml(self.cmt).encode(ExternalEncoding), input_name='cmt'), namespace_, eol_))
+            outfile.write('<%scmt>%s</%scmt>%s' % (namespace_, self.gds_format_string(quote_xml(self.cmt), input_name='cmt'), namespace_, eol_))
         if self.desc is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc).encode(ExternalEncoding), input_name='desc'), namespace_, eol_))
+            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc), input_name='desc'), namespace_, eol_))
         if self.src is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssrc>%s</%ssrc>%s' % (namespace_, self.gds_format_string(quote_xml(self.src).encode(ExternalEncoding), input_name='src'), namespace_, eol_))
+            outfile.write('<%ssrc>%s</%ssrc>%s' % (namespace_, self.gds_format_string(quote_xml(self.src), input_name='src'), namespace_, eol_))
         for link_ in self.link:
             link_.export(outfile, level, namespace_, name_='link', pretty_print=pretty_print)
         if self.sym is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssym>%s</%ssym>%s' % (namespace_, self.gds_format_string(quote_xml(self.sym).encode(ExternalEncoding), input_name='sym'), namespace_, eol_))
+            outfile.write('<%ssym>%s</%ssym>%s' % (namespace_, self.gds_format_string(quote_xml(self.sym), input_name='sym'), namespace_, eol_))
         if self.type_ is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_).encode(ExternalEncoding), input_name='type'), namespace_, eol_))
+            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_), input_name='type'), namespace_, eol_))
         if self.fix is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sfix>%s</%sfix>%s' % (namespace_, self.gds_format_string(quote_xml(self.fix).encode(ExternalEncoding), input_name='fix'), namespace_, eol_))
+            outfile.write('<%sfix>%s</%sfix>%s' % (namespace_, self.gds_format_string(quote_xml(self.fix), input_name='fix'), namespace_, eol_))
         if self.sat is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%ssat>%s</%ssat>%s' % (namespace_, self.gds_format_integer(self.sat, input_name='sat'), namespace_, eol_))
@@ -1002,7 +1003,7 @@ class wptType(GeneratedsSuper):
             outfile.write('ele=%f,\n' % self.ele)
         if self.time is not None:
             showIndent(outfile, level)
-            outfile.write('time=%s,\n' % quote_python(self.time).encode(ExternalEncoding))
+            outfile.write('time=%s,\n' % quote_python(self.time))
         if self.magvar is not None:
             showIndent(outfile, level)
             outfile.write('magvar=%f,\n' % self.magvar)
@@ -1011,16 +1012,16 @@ class wptType(GeneratedsSuper):
             outfile.write('geoidheight=%f,\n' % self.geoidheight)
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+            outfile.write('name=%s,\n' % quote_python(self.name))
         if self.cmt is not None:
             showIndent(outfile, level)
-            outfile.write('cmt=%s,\n' % quote_python(self.cmt).encode(ExternalEncoding))
+            outfile.write('cmt=%s,\n' % quote_python(self.cmt))
         if self.desc is not None:
             showIndent(outfile, level)
-            outfile.write('desc=%s,\n' % quote_python(self.desc).encode(ExternalEncoding))
+            outfile.write('desc=%s,\n' % quote_python(self.desc))
         if self.src is not None:
             showIndent(outfile, level)
-            outfile.write('src=%s,\n' % quote_python(self.src).encode(ExternalEncoding))
+            outfile.write('src=%s,\n' % quote_python(self.src))
         showIndent(outfile, level)
         outfile.write('link=[\n')
         level += 1
@@ -1035,13 +1036,13 @@ class wptType(GeneratedsSuper):
         outfile.write('],\n')
         if self.sym is not None:
             showIndent(outfile, level)
-            outfile.write('sym=%s,\n' % quote_python(self.sym).encode(ExternalEncoding))
+            outfile.write('sym=%s,\n' % quote_python(self.sym))
         if self.type_ is not None:
             showIndent(outfile, level)
-            outfile.write('type_=%s,\n' % quote_python(self.type_).encode(ExternalEncoding))
+            outfile.write('type_=%s,\n' % quote_python(self.type_))
         if self.fix is not None:
             showIndent(outfile, level)
-            outfile.write('fix=%s,\n' % quote_python(self.fix).encode(ExternalEncoding))
+            outfile.write('fix=%s,\n' % quote_python(self.fix))
         if self.sat is not None:
             showIndent(outfile, level)
             outfile.write('sat=%d,\n' % self.sat)
@@ -1077,7 +1078,7 @@ class wptType(GeneratedsSuper):
             already_processed.append('lat')
             try:
                 self.lat = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (lat): %s' % exp)
             self.validate_latitudeType(self.lat)    # validate type latitudeType
         value = find_attr_value_('lon', node)
@@ -1085,7 +1086,7 @@ class wptType(GeneratedsSuper):
             already_processed.append('lon')
             try:
                 self.lon = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (lon): %s' % exp)
             self.validate_longitudeType(self.lon)    # validate type longitudeType
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
@@ -1093,7 +1094,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'ele')
             self.ele = fval_
@@ -1105,7 +1106,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'magvar')
             self.magvar = fval_
@@ -1114,7 +1115,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'geoidheight')
             self.geoidheight = fval_
@@ -1155,7 +1156,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -1165,7 +1166,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'hdop')
             self.hdop = fval_
@@ -1173,7 +1174,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'vdop')
             self.vdop = fval_
@@ -1181,7 +1182,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'pdop')
             self.pdop = fval_
@@ -1189,7 +1190,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'ageofdgpsdata')
             self.ageofdgpsdata = fval_
@@ -1197,7 +1198,7 @@ class wptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             ival_ = self.gds_validate_integer(ival_, node, 'dgpsid')
             self.dgpsid = ival_
@@ -1283,16 +1284,16 @@ class rteType(GeneratedsSuper):
             eol_ = ''
         if self.name is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_, eol_))
+            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name), input_name='name'), namespace_, eol_))
         if self.cmt is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%scmt>%s</%scmt>%s' % (namespace_, self.gds_format_string(quote_xml(self.cmt).encode(ExternalEncoding), input_name='cmt'), namespace_, eol_))
+            outfile.write('<%scmt>%s</%scmt>%s' % (namespace_, self.gds_format_string(quote_xml(self.cmt), input_name='cmt'), namespace_, eol_))
         if self.desc is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc).encode(ExternalEncoding), input_name='desc'), namespace_, eol_))
+            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc), input_name='desc'), namespace_, eol_))
         if self.src is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssrc>%s</%ssrc>%s' % (namespace_, self.gds_format_string(quote_xml(self.src).encode(ExternalEncoding), input_name='src'), namespace_, eol_))
+            outfile.write('<%ssrc>%s</%ssrc>%s' % (namespace_, self.gds_format_string(quote_xml(self.src), input_name='src'), namespace_, eol_))
         for link_ in self.link:
             link_.export(outfile, level, namespace_, name_='link', pretty_print=pretty_print)
         if self.number is not None:
@@ -1300,7 +1301,7 @@ class rteType(GeneratedsSuper):
             outfile.write('<%snumber>%s</%snumber>%s' % (namespace_, self.gds_format_integer(self.number, input_name='number'), namespace_, eol_))
         if self.type_ is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_).encode(ExternalEncoding), input_name='type'), namespace_, eol_))
+            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_), input_name='type'), namespace_, eol_))
         if self.extensions is not None:
             self.extensions.export(outfile, level, namespace_, name_='extensions', pretty_print=pretty_print)
         for rtept_ in self.rtept:
@@ -1330,16 +1331,16 @@ class rteType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+            outfile.write('name=%s,\n' % quote_python(self.name))
         if self.cmt is not None:
             showIndent(outfile, level)
-            outfile.write('cmt=%s,\n' % quote_python(self.cmt).encode(ExternalEncoding))
+            outfile.write('cmt=%s,\n' % quote_python(self.cmt))
         if self.desc is not None:
             showIndent(outfile, level)
-            outfile.write('desc=%s,\n' % quote_python(self.desc).encode(ExternalEncoding))
+            outfile.write('desc=%s,\n' % quote_python(self.desc))
         if self.src is not None:
             showIndent(outfile, level)
-            outfile.write('src=%s,\n' % quote_python(self.src).encode(ExternalEncoding))
+            outfile.write('src=%s,\n' % quote_python(self.src))
         showIndent(outfile, level)
         outfile.write('link=[\n')
         level += 1
@@ -1357,7 +1358,7 @@ class rteType(GeneratedsSuper):
             outfile.write('number=%d,\n' % self.number)
         if self.type_ is not None:
             showIndent(outfile, level)
-            outfile.write('type_=%s,\n' % quote_python(self.type_).encode(ExternalEncoding))
+            outfile.write('type_=%s,\n' % quote_python(self.type_))
         if self.extensions is not None:
             showIndent(outfile, level)
             outfile.write('extensions=model_.extensionsType(\n')
@@ -1408,7 +1409,7 @@ class rteType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -1503,16 +1504,16 @@ class trkType(GeneratedsSuper):
             eol_ = ''
         if self.name is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_, eol_))
+            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name), input_name='name'), namespace_, eol_))
         if self.cmt is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%scmt>%s</%scmt>%s' % (namespace_, self.gds_format_string(quote_xml(self.cmt).encode(ExternalEncoding), input_name='cmt'), namespace_, eol_))
+            outfile.write('<%scmt>%s</%scmt>%s' % (namespace_, self.gds_format_string(quote_xml(self.cmt), input_name='cmt'), namespace_, eol_))
         if self.desc is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc).encode(ExternalEncoding), input_name='desc'), namespace_, eol_))
+            outfile.write('<%sdesc>%s</%sdesc>%s' % (namespace_, self.gds_format_string(quote_xml(self.desc), input_name='desc'), namespace_, eol_))
         if self.src is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%ssrc>%s</%ssrc>%s' % (namespace_, self.gds_format_string(quote_xml(self.src).encode(ExternalEncoding), input_name='src'), namespace_, eol_))
+            outfile.write('<%ssrc>%s</%ssrc>%s' % (namespace_, self.gds_format_string(quote_xml(self.src), input_name='src'), namespace_, eol_))
         for link_ in self.link:
             link_.export(outfile, level, namespace_, name_='link', pretty_print=pretty_print)
         if self.number is not None:
@@ -1520,7 +1521,7 @@ class trkType(GeneratedsSuper):
             outfile.write('<%snumber>%s</%snumber>%s' % (namespace_, self.gds_format_integer(self.number, input_name='number'), namespace_, eol_))
         if self.type_ is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_).encode(ExternalEncoding), input_name='type'), namespace_, eol_))
+            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_), input_name='type'), namespace_, eol_))
         if self.extensions is not None:
             self.extensions.export(outfile, level, namespace_, name_='extensions', pretty_print=pretty_print)
         for trkseg_ in self.trkseg:
@@ -1550,16 +1551,16 @@ class trkType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+            outfile.write('name=%s,\n' % quote_python(self.name))
         if self.cmt is not None:
             showIndent(outfile, level)
-            outfile.write('cmt=%s,\n' % quote_python(self.cmt).encode(ExternalEncoding))
+            outfile.write('cmt=%s,\n' % quote_python(self.cmt))
         if self.desc is not None:
             showIndent(outfile, level)
-            outfile.write('desc=%s,\n' % quote_python(self.desc).encode(ExternalEncoding))
+            outfile.write('desc=%s,\n' % quote_python(self.desc))
         if self.src is not None:
             showIndent(outfile, level)
-            outfile.write('src=%s,\n' % quote_python(self.src).encode(ExternalEncoding))
+            outfile.write('src=%s,\n' % quote_python(self.src))
         showIndent(outfile, level)
         outfile.write('link=[\n')
         level += 1
@@ -1577,7 +1578,7 @@ class trkType(GeneratedsSuper):
             outfile.write('number=%d,\n' % self.number)
         if self.type_ is not None:
             showIndent(outfile, level)
-            outfile.write('type_=%s,\n' % quote_python(self.type_).encode(ExternalEncoding))
+            outfile.write('type_=%s,\n' % quote_python(self.type_))
         if self.extensions is not None:
             showIndent(outfile, level)
             outfile.write('extensions=model_.extensionsType(\n')
@@ -1628,7 +1629,7 @@ class trkType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 ival_ = int(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires integer: %s' % exp)
             if ival_ < 0:
                 raise_parse_error(child_, 'requires nonNegativeInteger')
@@ -1878,7 +1879,7 @@ class copyrightType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='copyrightType'):
         if self.author is not None and 'author' not in already_processed:
             already_processed.append('author')
-            outfile.write(' author=%s' % (self.gds_format_string(quote_attrib(self.author).encode(ExternalEncoding), input_name='author'), ))
+            outfile.write(' author=%s' % (self.gds_format_string(quote_attrib(self.author), input_name='author'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='copyrightType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1888,7 +1889,7 @@ class copyrightType(GeneratedsSuper):
             self.year.export(outfile, level, namespace_, name_='year', pretty_print=pretty_print)
         if self.license is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%slicense>%s</%slicense>%s' % (namespace_, self.gds_format_string(quote_xml(self.license).encode(ExternalEncoding), input_name='license'), namespace_, eol_))
+            outfile.write('<%slicense>%s</%slicense>%s' % (namespace_, self.gds_format_string(quote_xml(self.license), input_name='license'), namespace_, eol_))
     def hasContent_(self):
         if (
             self.year is not None or
@@ -1916,7 +1917,7 @@ class copyrightType(GeneratedsSuper):
             outfile.write('),\n')
         if self.license is not None:
             showIndent(outfile, level)
-            outfile.write('license=%s,\n' % quote_python(self.license).encode(ExternalEncoding))
+            outfile.write('license=%s,\n' % quote_python(self.license))
     def build(self, node):
         self.buildAttributes(node, node.attrib, [])
         for child in node:
@@ -1979,7 +1980,7 @@ class linkType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='linkType'):
         if self.href is not None and 'href' not in already_processed:
             already_processed.append('href')
-            outfile.write(' href=%s' % (self.gds_format_string(quote_attrib(self.href).encode(ExternalEncoding), input_name='href'), ))
+            outfile.write(' href=%s' % (self.gds_format_string(quote_attrib(self.href), input_name='href'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='linkType', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1987,10 +1988,10 @@ class linkType(GeneratedsSuper):
             eol_ = ''
         if self.text is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stext>%s</%stext>%s' % (namespace_, self.gds_format_string(quote_xml(self.text).encode(ExternalEncoding), input_name='text'), namespace_, eol_))
+            outfile.write('<%stext>%s</%stext>%s' % (namespace_, self.gds_format_string(quote_xml(self.text), input_name='text'), namespace_, eol_))
         if self.type_ is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_).encode(ExternalEncoding), input_name='type'), namespace_, eol_))
+            outfile.write('<%stype>%s</%stype>%s' % (namespace_, self.gds_format_string(quote_xml(self.type_), input_name='type'), namespace_, eol_))
     def hasContent_(self):
         if (
             self.text is not None or
@@ -2012,10 +2013,10 @@ class linkType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         if self.text is not None:
             showIndent(outfile, level)
-            outfile.write('text=%s,\n' % quote_python(self.text).encode(ExternalEncoding))
+            outfile.write('text=%s,\n' % quote_python(self.text))
         if self.type_ is not None:
             showIndent(outfile, level)
-            outfile.write('type_=%s,\n' % quote_python(self.type_).encode(ExternalEncoding))
+            outfile.write('type_=%s,\n' % quote_python(self.type_))
     def build(self, node):
         self.buildAttributes(node, node.attrib, [])
         for child in node:
@@ -2076,10 +2077,10 @@ class emailType(GeneratedsSuper):
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='emailType'):
         if self.domain is not None and 'domain' not in already_processed:
             already_processed.append('domain')
-            outfile.write(' domain=%s' % (self.gds_format_string(quote_attrib(self.domain).encode(ExternalEncoding), input_name='domain'), ))
+            outfile.write(' domain=%s' % (self.gds_format_string(quote_attrib(self.domain), input_name='domain'), ))
         if self.id is not None and 'id' not in already_processed:
             already_processed.append('id')
-            outfile.write(' id=%s' % (self.gds_format_string(quote_attrib(self.id).encode(ExternalEncoding), input_name='id'), ))
+            outfile.write(' id=%s' % (self.gds_format_string(quote_attrib(self.id), input_name='id'), ))
     def exportChildren(self, outfile, level, namespace_='', name_='emailType', fromsubclass_=False, pretty_print=True):
         pass
     def hasContent_(self):
@@ -2169,7 +2170,7 @@ class personType(GeneratedsSuper):
             eol_ = ''
         if self.name is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name).encode(ExternalEncoding), input_name='name'), namespace_, eol_))
+            outfile.write('<%sname>%s</%sname>%s' % (namespace_, self.gds_format_string(quote_xml(self.name), input_name='name'), namespace_, eol_))
         if self.email is not None:
             self.email.export(outfile, level, namespace_, name_='email', pretty_print=pretty_print)
         if self.link is not None:
@@ -2193,7 +2194,7 @@ class personType(GeneratedsSuper):
     def exportLiteralChildren(self, outfile, level, name_):
         if self.name is not None:
             showIndent(outfile, level)
-            outfile.write('name=%s,\n' % quote_python(self.name).encode(ExternalEncoding))
+            outfile.write('name=%s,\n' % quote_python(self.name))
         if self.email is not None:
             showIndent(outfile, level)
             outfile.write('email=model_.emailType(\n')
@@ -2294,7 +2295,7 @@ class ptType(GeneratedsSuper):
             outfile.write('<%sele>%s</%sele>%s' % (namespace_, self.gds_format_float(self.ele, input_name='ele'), namespace_, eol_))
         if self.time is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%stime>%s</%stime>%s' % (namespace_, self.gds_format_string(quote_xml(self.time).encode(ExternalEncoding), input_name='time'), namespace_, eol_))
+            outfile.write('<%stime>%s</%stime>%s' % (namespace_, self.gds_format_string(quote_xml(self.time), input_name='time'), namespace_, eol_))
     def hasContent_(self):
         if (
             self.ele is not None or
@@ -2323,7 +2324,7 @@ class ptType(GeneratedsSuper):
             outfile.write('ele=%f,\n' % self.ele)
         if self.time is not None:
             showIndent(outfile, level)
-            outfile.write('time=%s,\n' % quote_python(self.time).encode(ExternalEncoding))
+            outfile.write('time=%s,\n' % quote_python(self.time))
     def build(self, node):
         self.buildAttributes(node, node.attrib, [])
         for child in node:
@@ -2335,7 +2336,7 @@ class ptType(GeneratedsSuper):
             already_processed.append('lat')
             try:
                 self.lat = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (lat): %s' % exp)
             self.validate_latitudeType(self.lat)    # validate type latitudeType
         value = find_attr_value_('lon', node)
@@ -2343,7 +2344,7 @@ class ptType(GeneratedsSuper):
             already_processed.append('lon')
             try:
                 self.lon = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (lon): %s' % exp)
             self.validate_longitudeType(self.lon)    # validate type longitudeType
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
@@ -2351,7 +2352,7 @@ class ptType(GeneratedsSuper):
             sval_ = child_.text
             try:
                 fval_ = float(sval_)
-            except (TypeError, ValueError), exp:
+            except (TypeError, ValueError) as exp:
                 raise_parse_error(child_, 'requires float or double: %s' % exp)
             fval_ = self.gds_validate_float(fval_, node, 'ele')
             self.ele = fval_
@@ -2552,7 +2553,7 @@ class boundsType(GeneratedsSuper):
             already_processed.append('minlat')
             try:
                 self.minlat = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (minlat): %s' % exp)
             self.validate_latitudeType(self.minlat)    # validate type latitudeType
         value = find_attr_value_('maxlon', node)
@@ -2560,7 +2561,7 @@ class boundsType(GeneratedsSuper):
             already_processed.append('maxlon')
             try:
                 self.maxlon = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (maxlon): %s' % exp)
             self.validate_longitudeType(self.maxlon)    # validate type longitudeType
         value = find_attr_value_('minlon', node)
@@ -2568,7 +2569,7 @@ class boundsType(GeneratedsSuper):
             already_processed.append('minlon')
             try:
                 self.minlon = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (minlon): %s' % exp)
             self.validate_longitudeType(self.minlon)    # validate type longitudeType
         value = find_attr_value_('maxlat', node)
@@ -2576,7 +2577,7 @@ class boundsType(GeneratedsSuper):
             already_processed.append('maxlat')
             try:
                 self.maxlat = float(value)
-            except ValueError, exp:
+            except ValueError as exp:
                 raise ValueError('Bad float/double attribute (maxlat): %s' % exp)
             self.validate_latitudeType(self.maxlat)    # validate type latitudeType
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
@@ -2589,7 +2590,7 @@ Usage: python <Parser>.py [ -s ] <in_xml_file>
 """
 
 def usage():
-    print USAGE_TEXT
+    print(USAGE_TEXT)
     sys.exit(1)
 
 
@@ -2610,15 +2611,19 @@ def parse(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(sys.stdout, 0, name_=rootTag,
+    if sys.stdout.encoding != 'UTF-8':
+        stdout = codecs.getwriter('utf-8')(sys.stdout, 'strict')
+    else:
+        stdout = sys.stdout
+    stdout.write('<?xml version="1.0" ?>\n')
+    rootObj.export(stdout, 0, name_=rootTag,
         namespacedef_='',
         pretty_print=True)
     return rootObj
 
 
 def parseString(inString):
-    from StringIO import StringIO
+    from io import StringIO
     doc = parsexml_(StringIO(inString))
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
