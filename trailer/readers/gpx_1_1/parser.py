@@ -18,9 +18,59 @@ from trailer.model.waypoint import Waypoint
 from trailer.model.year import Year
 from trailer.readers.common import optional_text
 
-GPX = '{http://www.topografix.com/GPX/1/0}'
+GPX = '{http://www.topografix.com/GPX/1/1}'
 
-def parse_gpx(xml):
+def parse_gpx(xml, gpx_extensions_parser=None,
+                   metadata_extensions_parser=None,
+                   waypoint_extensions_parser=None,
+                   route_extensions_parser=None,
+                   track_extensions_parser=None,
+                   segment_extensions_parser=None):
+    """Parse a GPX file into a GpxModel.
+
+    Args:
+        xml: A file-like-object opened in binary mode - that is containing
+             bytes rather than characters. The root element of the XML should
+             be a <gpx> element containing a version attribute. GPX versions
+             1.1 is supported.
+
+        gpx_extensions_parser: An optional callable which accepts an Element
+            with the 'extensions' tag and returns a list of model objects
+            representing the extensions. If not specified, extensions are
+            ignored.
+
+        metadata_extensions_parser: An optional callable which accepts an
+            Element with the 'extensions' tag and returns a list of model
+            objects representing the extensions. If not specified, extensions
+            are ignored.
+
+        waypoint_extensions_parser: An optional callable which accepts an
+            Element with the 'extensions' tag and returns a list of model
+            objects representing the extensions. If not specified, extensions
+            are ignored.
+
+        route_extensions_parser: An optional callable which accepts an Element
+            with the 'extensions' tag and returns a list of model objects
+            representing the extensions. If not specified, extensions are
+            ignored.
+
+        track_extensions_parser: An optional callable which accepts an Element
+            with the 'extensions' tag and returns a list of model objects
+            representing the extensions. If not specified, extensions are
+            ignored.
+
+        segment_extensions_parser: An optional callable which accepts an
+            Element with the 'extensions' tag and returns a list of model
+            objects representing the extensions. If not specified, extensions
+            are ignored.
+
+
+    Returns:
+        A GpxModel representing the data from the supplies xml.
+
+    Raises:
+        ValueError: The supplied XML could not be parsed as GPX.
+    """
     tree = etree.parse(xml)
     gpx_element = tree.getroot()
     if gpx_element.tag != GPX+'gpx':
@@ -44,12 +94,16 @@ def parse_gpx(xml):
     track_elements = gpx_element.findall(GPX+'trk')
     tracks = [parse_track(track_element) for track_element in track_elements]
 
-    gpx_model = GpxModel(creator, metadata, waypoints, routes, tracks)
+    extensions_element = metadata_element.find(GPX+'extensions')
+    extensions = nullable(parse_gpx_extensions)(extensions_element)
+
+    gpx_model = GpxModel(creator, metadata, waypoints, routes, tracks,
+                         extensions)
 
     return gpx_model
 
 
-def parse_metadata(metadata_element):
+def parse_metadata(metadata_element, metadata_extensions_parser):
     get_text = lambda tag: optional_text(metadata_element, GPX+tag)
 
     name = get_text('name')
@@ -71,7 +125,7 @@ def parse_metadata(metadata_element):
     bounds = nullable(parse_bounds)(bounds_element)
 
     extensions_element = metadata_element.find(GPX+'extensions')
-    extensions = nullable(parse_extensions)(extensions_element)
+    extensions = nullable(metadata_extensions_parser)(extensions_element)
 
     return Metadata(name, description, author, copyright, links, time,
                     keywords, bounds, extensions)
@@ -166,7 +220,7 @@ def parse_waypoint(waypoint_element):
     dgps_station_type = get_text('dgpsid')
 
     extensions_element = waypoint_element.find(GPX+'extensions')
-    extensions = nullable(parse_extensions)(extensions_element)
+    extensions = nullable(parse_waypoint_extensions)(extensions_element)
 
     waypoint = Waypoint(latitude, longitude, elevation, time, magvar,
                         geoid_height, name, comment, description, source,
@@ -202,7 +256,7 @@ def parse_route(route_element):
     classification = get_text('type')
 
     extensions_element = route_element.find(GPX+'extensions')
-    extensions = nullable(parse_extensions)(extensions_element)
+    extensions = nullable(parse_route_extensions)(extensions_element)
 
     routepoint_elements = route_element.findall(GPX+'rtept')
     routepoints = [parse_waypoint(routepoint_element) for routepoint_element in routepoint_elements]
@@ -230,7 +284,7 @@ def parse_track(track_element):
     segments = [parse_segment(segment_element) for segment_element in segment_elements]
 
     extensions_element = track_element.find(GPX+'extensions')
-    extensions = nullable(parse_extensions)(extensions_element)
+    extensions = nullable(parse_track_extensions)(extensions_element)
 
     track = Track(name, comment, description, source, links, number,
                   classification, extensions, segments)
@@ -242,18 +296,38 @@ def parse_segment(segment_element):
     trackpoints = [parse_waypoint(trackpoint_element) for trackpoint_element in trackpoint_elements]
 
     extensions_element = segment_element.find(GPX+'extensions')
-    extensions = nullable(parse_extensions)(extensions_element)
+    extensions = nullable(parse_segment_extensions)(extensions_element)
 
     segment = Segment(trackpoints, extensions)
     return segment
 
 
-def parse_extensions(extensions_element):
+def parse_gpx_extensions(extensions_elements):
+    return None
+
+
+def parse_metadata_extensions(extensions_element):
+    return None
+
+
+def parse_waypoint_extensions(extensions_element):
+    return None
+
+
+def parse_route_extensions(extensions_element):
+    return None
+
+
+def parse_track_extensions(extensions_element):
+    return None
+
+
+def parse_segment_extensions(extensions_element):
     return None
 
 
 def main():
-    with open('/Users/rjs/dev/opentrails/data/New_Track_201211261955574100/track.gps', 'rb') as xml:
+    with open('/Users/rjs/dev/trailer/data/Wypt 001.gpx', 'rb') as xml:
         gpx_model = parse_gpx(xml)
         return gpx_model
 

@@ -1,4 +1,5 @@
 trailer
 =======
 
-GPX trail representation
+GPX trail representation.
+

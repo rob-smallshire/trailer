@@ -15,11 +15,21 @@ from trailer.model.waypoint import Waypoint
 
 GPX = '{http://www.topografix.com/GPX/1/0}'
 
-def make_links(url, urlname):
-    return [Link(url, urlname)] if url is not None or urlname is not None else []
-
-
 def parse_gpx(xml):
+    """Parse a GPX file into a GpxModel.
+
+    Args:
+        xml: A file-like-object opened in binary mode - that is containing
+             bytes rather than characters. The root element of the XML should
+             be a <gpx> element containing a version attribute. GPX versions
+             1.0 is supported.
+
+    Returns:
+        A GpxModel representing the data from the supplies xml.
+
+    Raises:
+        ValueError: The supplied XML could not be parsed as GPX.
+    """
     tree = etree.parse(xml)
     gpx_element = tree.getroot()
     if gpx_element.tag != GPX+'gpx':
@@ -69,6 +79,7 @@ def parse_gpx(xml):
 
     return gpx_model
 
+
 def parse_bounds(bounds_element):
     minlat = bounds_element.attrib['minlat']
     minlon = bounds_element.attrib['minlon']
@@ -77,15 +88,16 @@ def parse_bounds(bounds_element):
     bounds = Bounds(minlat, minlon, maxlat, maxlon)
     return bounds
 
+
 def parse_waypoint(waypoint_element):
     get_text = lambda tag: optional_text(waypoint_element, GPX+tag)
 
-    latitude = waypoint_element.attrib['lat']
     longitude = waypoint_element.attrib['lon']
 
     elevation = get_text('ele')
     course = get_text('course')
     speed = get_text('speed')
+    latitude = waypoint_element.attrib['lat']
     time = get_text('time')
     magvar = get_text('magvar')
     geoid_height = get_text('geoidheight')
@@ -119,6 +131,7 @@ def parse_waypoint(waypoint_element):
 
     return waypoint
 
+
 def parse_route(route_element):
     get_text = lambda tag: optional_text(route_element, GPX+tag)
 
@@ -140,6 +153,7 @@ def parse_route(route_element):
                   source=source, links=links, number=number, points=routepoints)
 
     return route
+
 
 def parse_track(track_element):
     get_text = lambda tag: optional_text(track_element, GPX+tag)
@@ -171,6 +185,10 @@ def parse_segment(segment_element):
 
     segment = Segment(trackpoints)
     return segment
+
+
+def make_links(url, urlname):
+    return [Link(url, urlname)] if url is not None or urlname is not None else []
 
 
 def main():
