@@ -1,0 +1,9 @@
+include *.txt
+include *.md
+recursive-include trailer *.py
+recursive-include trailer/model *.py
+recursive-include trailer/readers *.py
+recursive-include trailer/readers/gpx_1_0 *.py
+recursive-include trailer/readers/gpx_1_1 *.py
+recursive-include schema *.xsd
+recursive-include tests *.py
