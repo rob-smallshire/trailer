@@ -3,8 +3,6 @@ from lxml import etree
 from trailer.readers.gpx_1_0.parser import parse_gpx as parse_gpx_1_0
 from trailer.readers.gpx_1_1.parser import parse_gpx as parse_gpx_1_1
 
-GPX = '{http://www.topografix.com/GPX/1/0}'
-
 def parse_gpx(xml):
     """Parse a GPX file into a GpxModel.
 
@@ -22,7 +20,11 @@ def parse_gpx(xml):
     """
     tree = etree.parse(xml)
     gpx_element = tree.getroot()
-    if gpx_element.tag != GPX+'gpx':
+    gpxns = '{' + gpx_element.nsmap.get(None, '') + '}'
+    if not gpxns.startswith('{http://www.topografix.com/GPX'):
+        raise ValueError("Unrecognised GPX namespace '{0}'".format(gpxns))
+
+    if gpx_element.tag != gpxns+'gpx':
         raise ValueError("No gpx root element")
 
     version = gpx_element.attrib['version']

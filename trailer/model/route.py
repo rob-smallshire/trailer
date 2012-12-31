@@ -54,7 +54,7 @@ class Route:
 
     @property
     def segments(self):
-        return self.segments
+        return self._segments
 
 
 
