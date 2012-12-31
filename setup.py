@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup, find_packages
 
-version = "0.5"
+version = "0.53"
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
@@ -10,6 +10,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'lxml',
+    'python-dateutil'
     ]
 
 setup(
@@ -26,6 +27,7 @@ setup(
     license="MIT License",
     include_package_data=True,
     install_requires=requires,
+    zip_safe=False,
     classifiers = [
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
