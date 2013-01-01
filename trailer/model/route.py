@@ -53,8 +53,8 @@ class Route:
         return self._extensions
 
     @property
-    def segments(self):
-        return self._segments
+    def points(self):
+        return self._points
 
 
 
