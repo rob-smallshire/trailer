@@ -45,24 +45,26 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
         return obj
 
 
-    def optional_attribute_scalar(self, data, obj, name):
+    def optional_attribute_scalar(self, data, obj, name, json_name=None):
+        json_name = json_name or name
         value = getattr(obj, name)
         if value is not None:
-            data[name] = self.visit(value)
+            data[json_name] = self.visit(value)
 
 
-    def optional_attribute_list(self, data, obj, name):
+    def optional_attribute_list(self, data, obj, name, json_name=None):
+        json_name = json_name or name
         values = getattr(obj, name)
         if values:
-            data[name] = [ self.visit(item) for item in values ]
+            data[json_name] = [ self.visit(item) for item in values ]
 
 
     def visit_GpxModel(self, gpx_model, *args, **kwargs):
         """Render a GPXModel as a single JSON structure."""
         result = OrderedDict()
 
-        put_scalar = lambda name: self.optional_attribute_scalar(result, gpx_model, name)
-        put_list = lambda name: self.optional_attribute_list(result, gpx_model, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, gpx_model, name, json_name)
+        put_list = lambda name, json_name=None: self.optional_attribute_list(result, gpx_model, name, json_name)
 
         put_scalar('creator')
         put_scalar('metadata')
@@ -77,8 +79,8 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
     def visit_Metadata(self, metadata, *args, **kwargs):
         """Render GPX Metadata as a single JSON structure."""
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, metadata, name)
-        put_list = lambda name: self.optional_attribute_list(result, metadata, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, metadata, name, json_name)
+        put_list = lambda name, json_name=None: self.optional_attribute_list(result, metadata, name, json_name)
 
         put_scalar('name')
         put_scalar('description')
@@ -95,7 +97,7 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Person(self, person, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, person, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, person, name, json_name)
 
         put_scalar('name')
         put_scalar('email')
@@ -106,7 +108,7 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Copyright(self, copyright, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, copyright, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, copyright, name, json_name)
 
         put_scalar('author')
         put_scalar('year')
@@ -123,7 +125,7 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Link(self, link, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, link, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, link, name, json_name)
 
         put_scalar('href')
         put_scalar('text')
@@ -138,12 +140,12 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Bounds(self, bounds, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, bounds, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, bounds, name, json_name)
 
-        put_scalar('minimum_latitude')
-        put_scalar('minimum_longitude')
-        put_scalar('maximum_latitude')
-        put_scalar('maximum_longitude')
+        put_scalar('minimum_latitude', 'minLat')
+        put_scalar('minimum_longitude', 'minLon')
+        put_scalar('maximum_latitude', 'maxLat')
+        put_scalar('maximum_longitude', 'maxLon')
 
         return result
 
@@ -154,28 +156,28 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Waypoint(self, waypoint, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, waypoint, name)
-        put_list = lambda name: self.optional_attribute_list(result, waypoint, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, waypoint, name, json_name)
+        put_list = lambda name, json_name=None: self.optional_attribute_list(result, waypoint, name, json_name)
 
-        put_scalar('latitude')
-        put_scalar('longitude')
-        put_scalar('elevation')
+        put_scalar('latitude', 'lat')
+        put_scalar('longitude', 'lon')
+        put_scalar('elevation', 'ele')
         put_scalar('time')
         put_scalar('magvar')
-        put_scalar('geoid_height')
+        put_scalar('geoid_height', 'geoidHeight')
         put_scalar('name')
         put_scalar('comment')
         put_scalar('description')
         put_scalar('source')
         put_list('links')
         put_scalar('symbol')
-        put_scalar('classification')
+        put_scalar('classification', 'type')
         put_scalar('fix')
-        put_scalar('num_satellites')
+        put_scalar('num_satellites', 'numSatellites')
         put_scalar('hdop')
         put_scalar('vdop')
         put_scalar('pdop')
-        put_scalar('seconds_since_dgps_update')
+        put_scalar('seconds_since_dgps_update', 'secondsSinceDgpsUpdate')
         put_scalar('speed')
         put_scalar('course')
         put_list('extensions')
@@ -185,8 +187,8 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Route(self, route, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, route, name)
-        put_list = lambda name: self.optional_attribute_list(result, route, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, route, name, json_name)
+        put_list = lambda name, json_name=None: self.optional_attribute_list(result, route, name, json_name)
 
         put_scalar('name')
         put_scalar('comment')
@@ -194,7 +196,7 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
         put_scalar('source')
         put_list('links')
         put_scalar('number')
-        put_scalar('classification')
+        put_scalar('classification', 'type')
         put_list('extensions')
         put_list('points')
 
@@ -203,8 +205,8 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Track(self, track, *args, **kwargs):
         result = OrderedDict()
-        put_scalar = lambda name: self.optional_attribute_scalar(result, track, name)
-        put_list = lambda name: self.optional_attribute_list(result, track, name)
+        put_scalar = lambda name, json_name=None: self.optional_attribute_scalar(result, track, name, json_name)
+        put_list = lambda name, json_name=None: self.optional_attribute_list(result, track, name, json_name)
 
         put_scalar('name')
         put_scalar('comment')
@@ -212,7 +214,7 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
         put_scalar('source')
         put_list('links')
         put_scalar('number')
-        put_scalar('classification')
+        put_scalar('classification', 'type')
         put_list('extensions')
         put_list('segments')
 
@@ -220,7 +222,7 @@ class GpxJsonEncoder(json.JSONEncoder, Visitor):
 
     def visit_Segment(self, segment, *args, **kwargs):
         result = OrderedDict()
-        put_list = lambda name: self.optional_attribute_list(result, segment, name)
+        put_list = lambda name, json_name=None: self.optional_attribute_list(result, segment, name, json_name)
 
         put_list('points')
         put_list('extensions')
@@ -234,10 +236,10 @@ def main():
     from trailer.readers.parser import parse_gpx
     with open('/Users/rjs/dev/trailer/data/culra.gpx', 'rb') as xml:
         gpx_model = parse_gpx(xml)
-        json_data = json.dumps(gpx_model, cls=GpxJsonEncoder)
+        json_data = json.dumps(gpx_model, cls=GpxJsonEncoder, indent=4, separators=(', ', ': '))
         return json_data
 
 
 if __name__ == '__main__':
-    gpx_model = main()
-    pass
+    json_data = main()
+    print(json_data)
