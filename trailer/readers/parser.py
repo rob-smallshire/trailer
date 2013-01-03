@@ -40,7 +40,7 @@ def parse_gpx(xml):
 
 
 def main():
-    with open('/Users/rjs/dev/trailer/data/blue_hills.gpx', 'rb') as xml:
+    with open('/Users/rjs/dev/trailer/data/culra.gpx', 'rb') as xml:
         gpx_model = parse_gpx(xml)
         return gpx_model
 

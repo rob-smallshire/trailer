@@ -103,7 +103,7 @@ def parse_gpx(xml, gpx_extensions_parser=None,
     return gpx_model
 
 
-def parse_metadata(metadata_element, metadata_extensions_parser):
+def parse_metadata(metadata_element):
     get_text = lambda tag: optional_text(metadata_element, GPX+tag)
 
     name = get_text('name')
@@ -125,7 +125,7 @@ def parse_metadata(metadata_element, metadata_extensions_parser):
     bounds = nullable(parse_bounds)(bounds_element)
 
     extensions_element = metadata_element.find(GPX+'extensions')
-    extensions = nullable(metadata_extensions_parser)(extensions_element)
+    extensions = nullable(parse_metadata_extensions)(extensions_element)
 
     return Metadata(name, description, author, copyright, links, time,
                     keywords, bounds, extensions)

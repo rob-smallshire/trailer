@@ -30,7 +30,7 @@ class Route:
 
     @property
     def description(self):
-        return self.description
+        return self._description
 
     @property
     def source(self):

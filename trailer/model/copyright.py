@@ -4,7 +4,7 @@ from trailer.model.year import Year
 class Copyright:
 
     def __init__(self, author, year=None, license=None):
-        self._author = author
+        self._author = str(author)
         self._year = nullable(Year)(year)
         self._license = nullable(str)(license)
 
