@@ -94,7 +94,7 @@ def parse_gpx(xml, gpx_extensions_parser=None,
     track_elements = gpx_element.findall(GPX+'trk')
     tracks = [parse_track(track_element) for track_element in track_elements]
 
-    extensions_element = metadata_element.find(GPX+'extensions')
+    extensions_element = gpx_element.find(GPX+'extensions')
     extensions = nullable(parse_gpx_extensions)(extensions_element)
 
     gpx_model = GpxModel(creator, metadata, waypoints, routes, tracks,
