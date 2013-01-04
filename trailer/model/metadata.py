@@ -57,7 +57,7 @@ class Metadata:
 
     @property
     def extensions(self):
-        return self._bounds
+        return self._extensions
 
 
 
