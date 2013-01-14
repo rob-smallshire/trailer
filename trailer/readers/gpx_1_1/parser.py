@@ -18,7 +18,7 @@ from trailer.model.waypoint import Waypoint
 from trailer.model.year import Year
 from trailer.readers.common import optional_text
 
-GPX = '{http://www.topografix.com/GPX/1/1}'
+GPX = '{http://www.topografix.com/GPX/1/0}'
 
 def parse_gpx(xml, gpx_extensions_parser=None,
                    metadata_extensions_parser=None,
