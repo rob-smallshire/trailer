@@ -13,7 +13,7 @@ def make_time(time):
 
 
 def nullable(t):
-    return lambda x: t(x) if x is not None else None
+    return lambda x, *args, **kwargs: t(x, *args, **kwargs) if x is not None else None
 
 
 

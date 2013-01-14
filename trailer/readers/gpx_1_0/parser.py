@@ -1,6 +1,6 @@
 from lxml import etree
 
-from trailer.readers.common import optional_text
+from trailer.readers.common import optional_text, determine_gpx_namespace
 
 from trailer.model.bounds import Bounds
 from trailer.model.fieldtools import nullable
@@ -13,9 +13,24 @@ from trailer.model.segment import Segment
 from trailer.model.track import Track
 from trailer.model.waypoint import Waypoint
 
-GPX = '{http://www.topografix.com/GPX/1/0}'
+def read_gpx(xml, gpxns=None):
+    """Parse a GPX file into a GpxModel.
 
-def parse_gpx(xml):
+    Args:
+        xml: A file-like-object opened in binary mode - that is containing
+             bytes rather than characters. The root element of the XML should
+             be a <gpx> element containing a version attribute. GPX versions
+             1.1 is supported.
+
+        gpxns: The XML namespace for GPX in Clarke notation (i.e. delimited
+             by curly braces). If None, (the default) the namespace used in
+             the document will be determined automatically.
+    """
+    tree = etree.parse(xml)
+    gpx_element = tree.getroot()
+    return parse_gpx(gpx_element, gpxns=gpxns)
+
+def parse_gpx(gpx_element, gpxns):
     """Parse a GPX file into a GpxModel.
 
     Args:
@@ -30,12 +45,12 @@ def parse_gpx(xml):
     Raises:
         ValueError: The supplied XML could not be parsed as GPX.
     """
-    tree = etree.parse(xml)
-    gpx_element = tree.getroot()
-    if gpx_element.tag != GPX+'gpx':
+    gpxns = gpxns if gpxns is not None else determine_gpx_namespace(gpx_element)
+
+    if gpx_element.tag != gpxns+'gpx':
         raise ValueError("No gpx root element")
 
-    get_text = lambda tag: optional_text(gpx_element, GPX+tag)
+    get_text = lambda tag: optional_text(gpx_element, gpxns+tag)
 
     version = gpx_element.attrib['version']
 
@@ -58,19 +73,19 @@ def parse_gpx(xml):
     time = get_text('time')
     keywords = get_text('keywords')
 
-    bounds_element = gpx_element.find(GPX+'bounds')
+    bounds_element = gpx_element.find(gpxns+'bounds')
     bounds = nullable(parse_bounds)(bounds_element)
 
     metadata = Metadata(name=name, description=description, author=author,
                links=links, time=time, keywords=keywords, bounds=bounds)
 
-    waypoint_elements = gpx_element.findall(GPX+'wpt')
+    waypoint_elements = gpx_element.findall(gpxns+'wpt')
     waypoints = [parse_waypoint(waypoint_element) for waypoint_element in waypoint_elements]
 
-    route_elements = gpx_element.findall(GPX+'rte')
+    route_elements = gpx_element.findall(gpxns+'rte')
     routes = [parse_route(route_element) for route_element in route_elements]
 
-    track_elements = gpx_element.findall(GPX+'trk')
+    track_elements = gpx_element.findall(gpxns+'trk')
     tracks = [parse_track(track_element) for track_element in track_elements]
 
     # TODO : Private elements
@@ -90,7 +105,7 @@ def parse_bounds(bounds_element):
 
 
 def parse_waypoint(waypoint_element):
-    get_text = lambda tag: optional_text(waypoint_element, GPX+tag)
+    get_text = lambda tag: optional_text(waypoint_element, gpxns+tag)
 
     longitude = waypoint_element.attrib['lon']
 
@@ -133,7 +148,7 @@ def parse_waypoint(waypoint_element):
 
 
 def parse_route(route_element):
-    get_text = lambda tag: optional_text(route_element, GPX+tag)
+    get_text = lambda tag: optional_text(route_element, gpxns+tag)
 
     name = get_text('name')
     comment = get_text('cmt')
@@ -146,7 +161,7 @@ def parse_route(route_element):
 
     number = get_text('number')
 
-    routepoint_elements = route_element.findall(GPX+'rtept')
+    routepoint_elements = route_element.findall(gpxns+'rtept')
     routepoints = [parse_waypoint(routepoint_element) for routepoint_element in routepoint_elements]
 
     route = Route(name=name, comment=comment, description=description,
@@ -156,7 +171,7 @@ def parse_route(route_element):
 
 
 def parse_track(track_element):
-    get_text = lambda tag: optional_text(track_element, GPX+tag)
+    get_text = lambda tag: optional_text(track_element, gpxns+tag)
 
     name = get_text('name')
     comment = get_text('comment')
@@ -171,7 +186,7 @@ def parse_track(track_element):
 
     # TODO: Private elements
 
-    segment_elements = track_element.findall(GPX+'trkseg')
+    segment_elements = track_element.findall(gpxns+'trkseg')
     segments = [parse_segment(segment_element) for segment_element in segment_elements]
 
     track = Track(name=name, comment=comment, description=description,
@@ -180,7 +195,7 @@ def parse_track(track_element):
 
 
 def parse_segment(segment_element):
-    trackpoint_elements = segment_element.findall(GPX+'trkpt')
+    trackpoint_elements = segment_element.findall(gpxns+'trkpt')
     trackpoints = [parse_waypoint(trackpoint_element) for trackpoint_element in trackpoint_elements]
 
     segment = Segment(trackpoints)
@@ -193,7 +208,7 @@ def make_links(url, urlname):
 
 def main():
     with open('/Users/rjs/dev/trailer/data/blue_hills.gpx', 'rb') as xml:
-        gpx_model = parse_gpx(xml)
+        gpx_model = read_gpx(xml)
         return gpx_model
 
 
