@@ -30,7 +30,7 @@ def read_gpx(xml, gpxns=None):
     gpx_element = tree.getroot()
     return parse_gpx(gpx_element, gpxns=gpxns)
 
-def parse_gpx(gpx_element, gpxns):
+def parse_gpx(gpx_element, gpxns=None):
     """Parse a GPX file into a GpxModel.
 
     Args:
@@ -80,13 +80,13 @@ def parse_gpx(gpx_element, gpxns):
                links=links, time=time, keywords=keywords, bounds=bounds)
 
     waypoint_elements = gpx_element.findall(gpxns+'wpt')
-    waypoints = [parse_waypoint(waypoint_element) for waypoint_element in waypoint_elements]
+    waypoints = [parse_waypoint(waypoint_element, gpxns) for waypoint_element in waypoint_elements]
 
     route_elements = gpx_element.findall(gpxns+'rte')
-    routes = [parse_route(route_element) for route_element in route_elements]
+    routes = [parse_route(route_element, gpxns) for route_element in route_elements]
 
     track_elements = gpx_element.findall(gpxns+'trk')
-    tracks = [parse_track(track_element) for track_element in track_elements]
+    tracks = [parse_track(track_element, gpxns) for track_element in track_elements]
 
     # TODO : Private elements
 
@@ -104,7 +104,8 @@ def parse_bounds(bounds_element):
     return bounds
 
 
-def parse_waypoint(waypoint_element):
+def parse_waypoint(waypoint_element, gpxns=None):
+    gpxns = gpxns if gpxns is not None else determine_gpx_namespace(waypoint_element)
     get_text = lambda tag: optional_text(waypoint_element, gpxns+tag)
 
     longitude = waypoint_element.attrib['lon']
@@ -147,7 +148,8 @@ def parse_waypoint(waypoint_element):
     return waypoint
 
 
-def parse_route(route_element):
+def parse_route(route_element, gpxns=None):
+    gpxns = gpxns if gpxns is not None else determine_gpx_namespace(route_element)
     get_text = lambda tag: optional_text(route_element, gpxns+tag)
 
     name = get_text('name')
@@ -162,7 +164,7 @@ def parse_route(route_element):
     number = get_text('number')
 
     routepoint_elements = route_element.findall(gpxns+'rtept')
-    routepoints = [parse_waypoint(routepoint_element) for routepoint_element in routepoint_elements]
+    routepoints = [parse_waypoint(routepoint_element, gpxns) for routepoint_element in routepoint_elements]
 
     route = Route(name=name, comment=comment, description=description,
                   source=source, links=links, number=number, points=routepoints)
@@ -170,7 +172,8 @@ def parse_route(route_element):
     return route
 
 
-def parse_track(track_element):
+def parse_track(track_element, gpxns=None):
+    gpxns = gpxns if gpxns is not None else determine_gpx_namespace(track_element)
     get_text = lambda tag: optional_text(track_element, gpxns+tag)
 
     name = get_text('name')
@@ -187,16 +190,17 @@ def parse_track(track_element):
     # TODO: Private elements
 
     segment_elements = track_element.findall(gpxns+'trkseg')
-    segments = [parse_segment(segment_element) for segment_element in segment_elements]
+    segments = [parse_segment(segment_element, gpxns) for segment_element in segment_elements]
 
     track = Track(name=name, comment=comment, description=description,
                   source=source, links=links, number=number, segments=segments)
     return track
 
 
-def parse_segment(segment_element):
+def parse_segment(segment_element, gpxns=None):
+    gpxns = gpxns if gpxns is not None else determine_gpx_namespace(segment_element)
     trackpoint_elements = segment_element.findall(gpxns+'trkpt')
-    trackpoints = [parse_waypoint(trackpoint_element) for trackpoint_element in trackpoint_elements]
+    trackpoints = [parse_waypoint(trackpoint_element, gpxns) for trackpoint_element in trackpoint_elements]
 
     segment = Segment(trackpoints)
     return segment
